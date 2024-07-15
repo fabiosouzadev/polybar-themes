@@ -1,79 +1,98 @@
 #!/usr/bin/env bash
 
-dir="$HOME/.config/polybar"
-themes=(`ls --hide="launch.sh" $dir`)
+POLYBAR_DIR="$HOME/.config/polybar/simple"
+THEME=""
 
 launch_bar() {
-	# Terminate already running bar instances
-	killall -q polybar
+	
+    # Terminate already running bar instances
+    #killall -q polybar
+    pkill polybar
 
-	# Wait until the processes have been shut down
+    # Wait until the processes have been shut down
 	while pgrep -u $UID -x polybar >/dev/null; do sleep 1; done
 
-	# Launch the bar
-	if [[ "$style" == "hack" || "$style" == "cuts" ]]; then
-		polybar -q top -c "$dir/$style/config.ini" &
-		polybar -q bottom -c "$dir/$style/config.ini" &
-	elif [[ "$style" == "pwidgets" ]]; then
-		bash "$dir"/pwidgets/launch.sh --main
-	else
-		polybar -q main -c "$dir/$style/config.ini" &	
-	fi
+    # Launch new polybar(s)                                                            
+    if type "xrandr"; then                                                             
+        IFS=$'\n'  # must set internal field separator to avoid dumb                   
+        for entry in $(xrandr --query | grep " connected"); do                         
+            mon=$(cut -d" " -f1 <<< "$entry")                                          
+            status=$(cut -d" " -f3 <<< "$entry")                                       
+                                                                                       
+            tray_pos=""                                                                
+            if [ "$status" == "primary" ]; then                                        
+                tray_pos="right"                                                       
+            fi                                                                         
+                                                                                       
+            MONITOR=$mon TRAY_POS=$tray_pos polybar -r -c "$POLYBAR_DIR/$THEME/config.ini" -q main 2>&1 | tee -a /tmp/polybar-monitor-"$mon".log &
+            #sleep 1
+        done                                                                          
+        unset IFS  # avoid mega dumb by resetting the IFS                              
+    else                                                                               
+        polybar -r -c "$POLYBAR_DIR/$THEME/config.ini" -q main 2>&1 | tee -a /tmp/polybar.log
+    fi
 }
 
-if [[ "$1" == "--material" ]]; then
-	style="material"
+if [[ "$1" == "--one" ]]; then
+	THEME="one"
+	launch_bar
+
+elif [[ "$1" == "--two" ]]; then
+	THEME="two"
+	launch_bar
+elif [[ "$1" == "--material" ]]; then
+	THEME="material"
 	launch_bar
 
 elif [[ "$1" == "--shades" ]]; then
-	style="shades"
+	THEME="shades"
 	launch_bar
 
 elif [[ "$1" == "--hack" ]]; then
-	style="hack"
+	THEME="hack"
 	launch_bar
 
 elif [[ "$1" == "--docky" ]]; then
-	style="docky"
+	THEME="docky"
 	launch_bar
 
 elif [[ "$1" == "--cuts" ]]; then
-	style="cuts"
+	THEME="cuts"
 	launch_bar
 
 elif [[ "$1" == "--shapes" ]]; then
-	style="shapes"
+	THEME="shapes"
 	launch_bar
 
 elif [[ "$1" == "--grayblocks" ]]; then
-	style="grayblocks"
+	THEME="grayblocks"
 	launch_bar
 
 elif [[ "$1" == "--blocks" ]]; then
-	style="blocks"
+	THEME="blocks"
 	launch_bar
 
 elif [[ "$1" == "--colorblocks" ]]; then
-	style="colorblocks"
+	THEME="colorblocks"
 	launch_bar
 
 elif [[ "$1" == "--forest" ]]; then
-	style="forest"
+	THEME="forest"
 	launch_bar
 
 elif [[ "$1" == "--pwidgets" ]]; then
-	style="pwidgets"
+	THEME="pwidgets"
 	launch_bar
 
 elif [[ "$1" == "--panels" ]]; then
-	style="panels"
+	THEME="panels"
 	launch_bar
-
 else
 	cat <<- EOF
 	Usage : launch.sh --theme
 		
 	Available Themes :
+	--one       --two            
 	--blocks    --colorblocks    --cuts      --docky
 	--forest    --grayblocks     --hack      --material
 	--panels    --pwidgets       --shades    --shapes
