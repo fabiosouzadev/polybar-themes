@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-POLYBAR_DIR="$HOME/.config/polybar"
+# POLYBAR_DIR="$HOME/.config/polybar"
+POLYBAR_DIR="$HOME/Projects/Personal/polybar-themes/simple"
 THEME=""
 
 launch_bar() {
@@ -40,6 +41,11 @@ if [[ "$1" == "--one" ]]; then
 elif [[ "$1" == "--two" ]]; then
 	THEME="two"
 	launch_bar
+
+elif [[ "$1" == "--my-colorblocks" ]]; then
+	THEME="my-colorblocks"
+	launch_bar
+
 elif [[ "$1" == "--material" ]]; then
 	THEME="material"
 	launch_bar
@@ -92,7 +98,7 @@ else
 	Usage : launch.sh --theme
 		
 	Available Themes :
-	--one       --two            
+	--one       --two            --my-colorblocks
 	--blocks    --colorblocks    --cuts      --docky
 	--forest    --grayblocks     --hack      --material
 	--panels    --pwidgets       --shades    --shapes
