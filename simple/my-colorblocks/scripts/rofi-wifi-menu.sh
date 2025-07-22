@@ -2,9 +2,8 @@
 
 # dir="~/Projects/Personal/polybar-themes/simple/my-colorblocks/scripts/rofi"
 dir="~/.config/polybar/my-colorblocks/scripts/rofi"
-uptime=$(uptime -p | sed -e 's/up //g')
 
-rofi_command="rofi -theme $dir/networkmenu.rasi"
+rofi_command="rofi -no-config -theme $dir/networkmenu.rasi"
 
 notify-send "Getting list of available Wi-Fi networks..."
 # Get a list of available wifi connections and morph it into a nice-looking list
