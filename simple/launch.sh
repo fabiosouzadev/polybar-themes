@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-# POLYBAR_DIR="$HOME/.config/polybar"
-POLYBAR_DIR="$HOME/Projects/Personal/polybar-themes/simple"
+POLYBAR_DIR="$HOME/.config/polybar"
+# POLYBAR_DIR="$HOME/Projects/Personal/polybar-themes/simple"
 THEME=""
 
 launch_bar() {
