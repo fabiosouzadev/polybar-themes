@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-POLYBAR_DIR="$HOME/.config/polybar"
+POLYBAR_DIR="$HOME/.config/polybar/simple"
 # POLYBAR_DIR="$HOME/Projects/Personal/polybar-themes/simple"
 THEME=""
 
