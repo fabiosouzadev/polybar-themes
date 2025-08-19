@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-DIR="$HOME/.config/polybar/my-colorblocks"
+DIR="$HOME/.config/polybar/simple/my-colorblocks"
 
 # Terminate already running bar instances
 killall -q polybar
