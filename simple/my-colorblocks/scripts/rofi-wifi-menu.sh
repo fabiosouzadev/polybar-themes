@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # dir="~/Projects/Personal/polybar-themes/simple/my-colorblocks/scripts/rofi"
-dir="~/.config/polybar/my-colorblocks/scripts/rofi"
+dir="~/.config/polybar/simple/my-colorblocks/scripts/rofi"
 
 rofi_command="rofi -no-config -theme $dir/networkmenu.rasi"
 
