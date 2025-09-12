@@ -6,7 +6,7 @@ CPU=$(ps -C ollama -o %cpu= | awk '{sum+=$1} END {print sum}')
 RAM=$(ps -C ollama -o %mem= | awk '{sum+=$1} END {print sum}')
 MODEL=$(pgrep -a ollama | grep serve | awk '{print $NF}' | tail -n1)
 
-if [ -z "$CPU" || "$CPU" = "0" ]; then
+if [ -z "$CPU" ] || ["$CPU" == "0" ]; then
   echo " 🤖  idle"
 else
   echo " 🤖 CPU:${CPU}% RAM:${RAM}% $MODEL"
