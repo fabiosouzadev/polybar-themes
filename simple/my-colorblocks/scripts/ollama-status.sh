@@ -3,7 +3,7 @@
 # Mostra uso de CPU/RAM do processo ollama
 CPU=$(ps -C ollama -o %cpu= | awk '{sum+=$1} END {print sum}')
 RAM=$(ps -C ollama -o %mem= | awk '{sum+=$1} END {print sum}')
-MODEL=$(ollama list | awk 'NR==2 {print $1}')
+MODEL=$(ollama list | awk 'NR==2 {split($1, parts, ":"); print parts[1]}')
 
 if [ -z "$CPU" ] || [ "$CPU" == "0" ] ; then
   echo "idle"
