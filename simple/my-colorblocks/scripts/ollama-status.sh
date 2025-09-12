@@ -8,7 +8,7 @@ MODEL=$(ollama list | awk 'NR==2 {print $1}')
 if [ -z "$CPU" ] || [ "$CPU" == "0" ] ; then
   echo "idle"
 else
-  echo "CPU:${CPU}% RAM:${RAM}% 🤖 $MODEL"
+  echo "CPU:${CPU}% RAM:${RAM}% $MODEL"
 fi
 
 # MODEL=$(pgrep -a ollama | grep serve | awk '{print $NF}' | tail -n1)
