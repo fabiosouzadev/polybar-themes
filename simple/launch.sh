@@ -13,25 +13,28 @@ launch_bar() {
     #killall -q polybar || true
 
     # Wait until the processes have been shut down
-	while pgrep -u $UID -x polybar >/dev/null; do sleep 0.5; done
+	while pgrep -u $UID -x polybar >/dev/null; do sleep 1; done
 
 	if $EXTERNAL_MODE; then
-	MONITOR="$(xrandr | awk '/ connected/{print $1}' | grep -E '^(?!eDP|LVDS)' | head -n1)"
-	[[ -z "$MONITOR" ]] && MONITOR="$(xrandr | awk '/ connected/{print $1}' | head -n1)"
+		MONITOR="$(xrandr | awk '/ connected/{print $1}' | grep -E '^(?!eDP|LVDS)' | head -n1)"
+		[[ -z "$MONITOR" ]] && MONITOR="$(xrandr | awk '/ connected/{print $1}' | head -n1)"
 
-	MONITOR=$MONITOR TRAY_POS=right polybar -r -c "$POLYBAR_DIR/$THEME/config.ini" -q main &
+		MONITOR=$MONITOR TRAY_POS=right polybar -r -c "$POLYBAR_DIR/$THEME/config.ini" -q main 2>&1 | tee -a /tmp/polybar-monitor-"$mon".log &
 	else
-	IFS=$'\n'
-	for entry in $(xrandr --query | grep " connected"); do
-		mon=$(cut -d" " -f1 <<< "$entry")
-		status=$(cut -d" " -f3 <<< "$entry")
-
-		tray_pos=""
-		[[ "$status" == "primary" ]] && tray_pos="right"
-
-		MONITOR=$mon TRAY_POS=$tray_pos polybar -r -c "$POLYBAR_DIR/$THEME/config.ini" -q main &
-	done
-	unset IFS
+        IFS=$'\n'  # must set internal field separator to avoid dumb                   
+        for entry in $(xrandr --query | grep " connected"); do                         
+            mon=$(cut -d" " -f1 <<< "$entry")                                          
+            status=$(cut -d" " -f3 <<< "$entry")                                       
+                                                                                       
+            tray_pos=""                                                                
+            if [ "$status" == "primary" ]; then                                        
+                tray_pos="right"                                                       
+            fi                                                                         
+                                                                                       
+            MONITOR=$mon TRAY_POS=$tray_pos polybar -r -c "$POLYBAR_DIR/$THEME/config.ini" -q main 2>&1 | tee -a /tmp/polybar-monitor-"$mon".log &
+            #sleep 1
+        done                                                                          
+        unset IFS  # avoid mega dumb by resetting the IFS
 	fi
 }
 
