@@ -3,7 +3,7 @@ POLYBAR_DIR="$HOME/.config/polybar/simple"
 THEME=""
 
 EXTERNAL_MODE=false
-[[ "${1:-}" == "--external" ]] && EXTERNAL_MODE=true
+[[ "${2:-}" == "--external" ]] && EXTERNAL_MODE=true
 
 launch_bar() {
 	
