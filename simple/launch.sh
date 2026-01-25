@@ -9,6 +9,7 @@ launch_bar() {
 	
     # Terminate already running bar instances
     #killall -q polybar
+	pkill -q polybar
     killall -q polybar || true
 
     # Wait until the processes have been shut down
