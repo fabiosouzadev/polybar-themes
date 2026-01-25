@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
 
-POLYBAR_DIR="$HOME/.config/polybar"
-THEME="simple"
+POLYBAR_DIR="$HOME/.config/polybar/simple"
+THEME="my-colorblocks"
 
 EXTERNAL_MODE=false
 [[ "${1:-}" == "--external" ]] && EXTERNAL_MODE=true
@@ -10,7 +10,7 @@ EXTERNAL_MODE=false
 killall -q polybar || true
 while pgrep -u "$UID" -x polybar >/dev/null; do sleep 0.5; done
 
-if $SINGLE_MODE; then
+if $EXTERNAL_MODE; then
   MONITOR="$(xrandr | awk '/ connected/{print $1}' | grep -E '^(?!eDP|LVDS)' | head -n1)"
   [[ -z "$MONITOR" ]] && MONITOR="$(xrandr | awk '/ connected/{print $1}' | head -n1)"
 
