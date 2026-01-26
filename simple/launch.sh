@@ -89,15 +89,15 @@ case "${1:-}" in
   --pwidgets)       THEME="pwidgets" ;;
   --panels)         THEME="panels" ;;
   *)
-    cat <<- EOF
-    Usage: launch.sh --theme [--external]
+    cat <<EOF
+Usage: launch.sh --theme [--external]
 
-    Available Themes:
-      --one       --two            --my-colorblocks
-      --blocks    --colorblocks    --cuts      --docky
-      --forest    --grayblocks     --hack      --material
-      --panels    --pwidgets       --shades    --shapes
-    EOF
+Available Themes:
+  --one       --two            --my-colorblocks
+  --blocks    --colorblocks    --cuts      --docky
+  --forest    --grayblocks     --hack      --material
+  --panels    --pwidgets       --shades    --shapes
+EOF
     exit 1
     ;;
 esac
