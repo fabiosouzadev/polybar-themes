@@ -1,110 +1,105 @@
 #!/usr/bin/env bash
+set -euo pipefail
+
 POLYBAR_DIR="$HOME/.config/polybar/simple"
 THEME=""
 
 EXTERNAL_MODE=false
 [[ "${2:-}" == "--external" ]] && EXTERNAL_MODE=true
 
-launch_bar() {
-	
-    # Terminate already running bar instances
-    #killall -q polybar
-	pkill polybar
-    #killall -q polybar || true
+info() { echo "[POLYBAR] $*"; }
 
-    # Wait until the processes have been shut down
-	while pgrep -u $UID -x polybar >/dev/null; do sleep 1; done
+detect_external_monitor() {
+  # Prioriza monitor vindo do ambiente (modo clamshell)
+  if [[ -n "${MONITOR:-}" ]]; then
+    echo "$MONITOR"
+    return 0
+  fi
 
-	if $EXTERNAL_MODE; then
-		MONITOR="$(xrandr | awk '/ connected/{print $1}' | grep -E '^(?!eDP|LVDS)' | head -n1)"
-		[[ -z "$MONITOR" ]] && MONITOR="$(xrandr | awk '/ connected/{print $1}' | head -n1)"
+  # Detecta qualquer externo que não seja eDP/LVDS
+  local ext
+  ext="$(xrandr --query | awk '/ connected/{print $1}' | grep -Ev '^(eDP|LVDS)' | head -n1 || true)"
 
-		MONITOR=$MONITOR TRAY_POS=right polybar -r -c "$POLYBAR_DIR/$THEME/config.ini" -q main 2>&1 | tee -a /tmp/polybar-monitor-"$mon".log &
-	else
-        IFS=$'\n'  # must set internal field separator to avoid dumb                   
-        for entry in $(xrandr --query | grep " connected"); do                         
-            mon=$(cut -d" " -f1 <<< "$entry")                                          
-            status=$(cut -d" " -f3 <<< "$entry")                                       
-                                                                                       
-            tray_pos=""                                                                
-            if [ "$status" == "primary" ]; then                                        
-                tray_pos="right"                                                       
-            fi                                                                         
-                                                                                       
-            MONITOR=$mon TRAY_POS=$tray_pos polybar -r -c "$POLYBAR_DIR/$THEME/config.ini" -q main 2>&1 | tee -a /tmp/polybar-monitor-"$mon".log &
-            #sleep 1
-        done                                                                          
-        unset IFS  # avoid mega dumb by resetting the IFS
-	fi
+  if [[ -n "$ext" ]]; then
+    echo "$ext"
+    return 0
+  fi
+
+  # Fallback: primeiro conectado
+  xrandr --query | awk '/ connected/{print $1; exit}'
 }
 
-if [[ "$1" == "--one" ]]; then
-	THEME="one"
-	launch_bar
+launch_bar() {
+  info "Finalizando instâncias antigas do polybar..."
+  pkill -x polybar || true
 
-elif [[ "$1" == "--two" ]]; then
-	THEME="two"
-	launch_bar
+  while pgrep -u "$UID" -x polybar >/dev/null; do
+    sleep 0.5
+  done
 
-elif [[ "$1" == "--my-colorblocks" ]]; then
-	THEME="my-colorblocks"
-	launch_bar
+  if $EXTERNAL_MODE; then
+    MONITOR="$(detect_external_monitor)"
+    info "Modo EXTERNAL → Monitor: $MONITOR"
 
-elif [[ "$1" == "--material" ]]; then
-	THEME="material"
-	launch_bar
+    if [[ -z "$MONITOR" ]]; then
+      info "Nenhum monitor detectado para modo external."
+      exit 1
+    fi
 
-elif [[ "$1" == "--shades" ]]; then
-	THEME="shades"
-	launch_bar
+    TRAY_POS="right"
 
-elif [[ "$1" == "--hack" ]]; then
-	THEME="hack"
-	launch_bar
+    MONITOR="$MONITOR" TRAY_POS="$TRAY_POS" \
+      polybar -r -c "$POLYBAR_DIR/$THEME/config.ini" -q main \
+      2>&1 | tee -a "/tmp/polybar-monitor-$MONITOR.log" &
 
-elif [[ "$1" == "--docky" ]]; then
-	THEME="docky"
-	launch_bar
+  else
+    info "Modo MULTI-MONITOR"
 
-elif [[ "$1" == "--cuts" ]]; then
-	THEME="cuts"
-	launch_bar
+    while IFS= read -r mon; do
+      tray_pos=""
 
-elif [[ "$1" == "--shapes" ]]; then
-	THEME="shapes"
-	launch_bar
+      if xrandr --query | awk -v m="$mon" '$1 == m && $3 == "primary" { found=1 } END { exit !found }'; then
+        tray_pos="right"
+      fi
 
-elif [[ "$1" == "--grayblocks" ]]; then
-	THEME="grayblocks"
-	launch_bar
+      info "Iniciando polybar em $mon (tray: ${tray_pos:-none})"
 
-elif [[ "$1" == "--blocks" ]]; then
-	THEME="blocks"
-	launch_bar
+      MONITOR="$mon" TRAY_POS="$tray_pos" \
+        polybar -r -c "$POLYBAR_DIR/$THEME/config.ini" -q main \
+        2>&1 | tee -a "/tmp/polybar-monitor-$mon.log" &
 
-elif [[ "$1" == "--colorblocks" ]]; then
-	THEME="colorblocks"
-	launch_bar
+    done < <(xrandr --query | awk '/ connected/{print $1}')
+  fi
+}
 
-elif [[ "$1" == "--forest" ]]; then
-	THEME="forest"
-	launch_bar
+case "${1:-}" in
+  --one)            THEME="one" ;;
+  --two)            THEME="two" ;;
+  --my-colorblocks) THEME="my-colorblocks" ;;
+  --material)       THEME="material" ;;
+  --shades)         THEME="shades" ;;
+  --hack)           THEME="hack" ;;
+  --docky)          THEME="docky" ;;
+  --cuts)           THEME="cuts" ;;
+  --shapes)         THEME="shapes" ;;
+  --grayblocks)     THEME="grayblocks" ;;
+  --blocks)         THEME="blocks" ;;
+  --colorblocks)    THEME="colorblocks" ;;
+  --forest)         THEME="forest" ;;
+  --pwidgets)       THEME="pwidgets" ;;
+  --panels)         THEME="panels" ;;
+  *)
+    cat <<- EOF
+    Usage: launch.sh --theme [--external]
 
-elif [[ "$1" == "--pwidgets" ]]; then
-	THEME="pwidgets"
-	launch_bar
+    Available Themes:
+      --one       --two            --my-colorblocks
+      --blocks    --colorblocks    --cuts      --docky
+      --forest    --grayblocks     --hack      --material
+      --panels    --pwidgets       --shades    --shapes
+    EOF
+    exit 1
+    ;;
+esac
 
-elif [[ "$1" == "--panels" ]]; then
-	THEME="panels"
-	launch_bar
-else
-	cat <<- EOF
-	Usage : launch.sh --theme
-		
-	Available Themes :
-	--one       --two            --my-colorblocks
-	--blocks    --colorblocks    --cuts      --docky
-	--forest    --grayblocks     --hack      --material
-	--panels    --pwidgets       --shades    --shapes
-	EOF
-fi
+launch_bar
